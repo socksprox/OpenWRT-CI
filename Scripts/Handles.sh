@@ -5,8 +5,9 @@
 FEEDS_PATH="./feeds"
 PACKAGE_PATH="./package"
 
-# Inject CVE-2026-98432 backport (stable 6.18.56) until the source fork ships a newer kernel
-if [ -d "target/linux/generic/backport-6.18" ] && [ -d "$GITHUB_WORKSPACE/Patches" ]; then
+# Inject CVE-2026-98432 backport (stable 6.18.56) only while the source pins kernel < .56
+KV=$(sed -n 's/^LINUX_VERSION-6\.18 = \.\([0-9]*\).*/\1/p' target/linux/generic/kernel-6.18 2>/dev/null)
+if [ -n "$KV" ] && [ "$KV" -lt 56 ] && [ -d "target/linux/generic/backport-6.18" ] && [ -d "$GITHUB_WORKSPACE/Patches" ]; then
 	cp -f "$GITHUB_WORKSPACE"/Patches/*.patch target/linux/generic/backport-6.18/ 2>/dev/null || true
 	echo "Injected $(ls target/linux/generic/backport-6.18/995-*.patch 2>/dev/null | wc -l) custom backport patch(es)"
 fi
