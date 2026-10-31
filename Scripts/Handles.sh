@@ -5,6 +5,12 @@
 FEEDS_PATH="./feeds"
 PACKAGE_PATH="./package"
 
+# Inject CVE-2026-98432 backport (stable 6.18.56) until the source fork ships a newer kernel
+if [ -d "target/linux/generic/backport-6.18" ] && [ -d "$GITHUB_WORKSPACE/Patches" ]; then
+	cp -f "$GITHUB_WORKSPACE"/Patches/*.patch target/linux/generic/backport-6.18/ 2>/dev/null || true
+	echo "Injected $(ls target/linux/generic/backport-6.18/995-*.patch 2>/dev/null | wc -l) custom backport patch(es)"
+fi
+
 #修补命令统一入口：FIX <名称> <守卫目录> <命令...>
 #守卫目录不存在时直接跳过，保证在 bash -e 下不中断
 FIX() {
